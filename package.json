@@ -1,0 +1,32 @@
+{
+  "name": "expense-tracker-api",
+  "version": "1.0.0",
+  "description": "- M. Imam Alvien Cenna Alnaza (pienapin)\r - Amin Ma'ruf (AminMaruf10)\r - Lindi Srijayanti (lindisjay)\r - Abiyyu Ihsan (Abiyyu-Ihsan)",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon index.js",
+    "start": "nodemon index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pienapin/expense-tracker-api.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/pienapin/expense-tracker-api/issues"
+  },
+  "homepage": "https://github.com/pienapin/expense-tracker-api#readme",
+  "devDependencies": {
+    "prisma": "^4.5.0"
+  },
+  "dependencies": {
+    "@prisma/client": "^4.5.0",
+    "bcrypt": "^5.1.0",
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "jsonwebtoken": "^8.5.1"
+  }
+}
