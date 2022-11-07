@@ -1,17 +1,25 @@
-const { PrismaClient } = require('@prisma/client')
+const express = require ('express')
+const cors = require ('cors')
+const routes = require('./routes')
 
-const prisma = new PrismaClient()
+const app = express()
+const port = 8000
 
-async function main() {
-  // ... you will write your Prisma Client queries here
-}
+app.use(cors())
+app.use(express.json())
+app.use(express.urlencoded({extended: true}))
 
-main()
-  .then(async () => {
-    await prisma.$disconnect()
+
+//Welcome API
+app.get('/', async (req,res)=>{
+  res.status(200).send({
+    status: true,
+    data: 'Welcome to API Todo List and Express'
   })
-  .catch(async (e) => {
-    console.error(e)
-    await prisma.$disconnect()
-    process.exit(1)
-  })
+})
+
+routes(app)
+
+app.listen(port, ()=>{
+  console.log(`Server is running on https://localhost:${port}`)
+})
