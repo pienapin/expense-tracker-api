@@ -1,195 +1,159 @@
-const prisma = require('../helpers/database')
-const Joi = require('joi')
-const bcrypt = require('bcrypt')
+const prisma = require("../helpers/database");
+const bcrypt = require("bcryptjs");
 
 class _user {
-
-    UMasukUser = async (body) => {
+  listUser = async () => {
     try {
-            // Validation input
-            const schema = Joi.object({
-                name: Joi.string().required(),
-                email: Joi.string().required(),
-                password: Joi.string().required()
-            })
+      const list = await prisma.user.findMany({
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      });
 
-            const validation = schema.validate(body)
+      return {
+        status: true,
+        data: list,
+      };
+    } catch (error) {
+      console.error("listUser at user module Error: ", error);
 
-            if (validation.error) {
-                const errorDetails = validation.error.details.map(detail => detail.message)
-
-                return {
-                    status: false,
-                    code: 422,
-                    error: errorDetails.join(', ')
-                }
-            }
-
-            const password = bcrypt.hashSync(body.password, 10)
-            console.log(body.password, password)
-
-            // nama, email, password
-            const add = await prisma.user.create({
-                data: {
-                    email: body.email,
-                    name: body.name,
-                    password: password
-                }
-            })
-
-            return {
-                status: true,
-                data: add
-            }
-            
-        } catch (error) {
-            console.error('createUser user module Error: ', error)
-
-            return {
-                status: false,
-                error: error.message
-            }
-        }
+      return {
+        status: false,
+        error,
+      };
     }
+  };
 
-    UKeluarUser = async (body) => {
-        try {
-                // Validation input
-                const schema = Joi.object({
-                    name: Joi.string().required(),
-                    email: Joi.string().required(),
-                    password: Joi.string().required()
-                })
-    
-                const validation = schema.validate(body)
-    
-                if (validation.error) {
-                    const errorDetails = validation.error.details.map(detail => detail.message)
-    
-                    return {
-                        status: false,
-                        code: 422,
-                        error: errorDetails.join(', ')
-                    }
-                }
-    
-                const password = bcrypt.hashSync(body.password, 10)
-                console.log(body.password, password)
-    
-                // nama, email, password
-                const add = await prisma.user.create({
-                    data: {
-                        email: body.email,
-                        name: body.name,
-                        password: password
-                    }
-                })
-    
-                return {
-                    status: true,
-                    data: add
-                }
-                
-            } catch (error) {
-                console.error('createUser user module Error: ', error)
-    
-                return {
-                    status: false,
-                    error: error.message
-                }
-            }
-        }
+  addUser = async (body) => {
+    try {
+      const salt = await bcrypt.genSalt(10);
+      const hash = await bcrypt.hash(body.password, salt);
+      const add = await prisma.user.create({
+        data: {
+          email: body.email,
+          name: body.name,
+          password: hash,
+        },
+      });
 
-    updateUser = async (body) => {
-        try {
-            // Validation input
-            const schema = Joi.object({
-                id: Joi.number().required(),
-                name: Joi.string(),
-                email: Joi.string(),
-                password: Joi.string()
-            })
+      return {
+        status: true,
+        msg: "User is added.",
+      };
+    } catch (error) {
+      console.error("addUser at user module Error: ", error);
 
-            const validation = schema.validate(body)
-
-            if (validation.error) {
-                const errorDetails = validation.error.details.map(detail => detail.message)
-
-                return {
-                    status: false,
-                    code: 422,
-                    error: errorDetails.join(', ')
-                }
-            }
-
-            let password
-            if (body.password) {
-                password = bcrypt.hashSync(body.password, 10)
-            }
-             
-            // nama, email, password
-            const update = await prisma.user.update({
-                where: {
-                    id: body.id
-                },
-                data: {
-                    email: body.email,
-                    name: body.name,
-                    password: password
-                }
-            })
-
-            return {
-                status: true,
-                data: update
-            }
-            
-        } catch (error) {
-            console.error('updateUser user module Error: ', error)
-
-            return {
-                status: false,
-                error: error.message
-            }
-        }
+      return {
+        status: false,
+        error,
+      };
     }
+  };
 
-    deleteUser = async (id) => {
-        try {
-            // Validation input
-            const schema = Joi.number().required()
+  loginUser = async (email, password) => {
+    try {
+      const user = await prisma.user.findUnique({
+        where: {
+          email: email,
+        },
+      });
+      const checkPass = await bcrypt.compare(password, user.password);
+      if (checkPass) {
+        return {
+          status: true,
+          user: {
+            id: user.id,
+            email: user.email,
+            name: user.name,
+          },
+          msg: "Login Successful!",
+        };
+      } else {
+        return {
+          status: false,
+          msg: "Wrong Password!",
+        };
+      }
+    } catch (error) {
+      console.error("loginUser at user module Error: ", error);
 
-            const validation = schema.validate(id)
-
-            if (validation.error) {
-                const errorDetails = validation.error.details.map(detail => detail.message)
-
-                return {
-                    status: false,
-                    code: 422,
-                    error: errorDetails.join(', ')
-                }
-            }
-
-            const del = await prisma.user.delete({
-                where: {
-                    id: id
-                }
-            })
-
-            return{
-                status: true,
-                data: del
-            }
-        } catch (error) {
-            console.error('deleteUser user module Error: ', error)
-
-            return {
-                status: false,
-                error: error.message
-            }
-        }
+      return {
+        status: false,
+        error,
+      };
     }
+  };
+
+  editUser = async (id, body) => {
+    try {
+      const edit = await prisma.user.update({
+        where: {
+          id: id,
+        },
+        data: body,
+      });
+
+      return {
+        status: true,
+        msg: "Edit Successful.",
+      };
+    } catch (error) {
+      console.error("editUser at user module Error: ", error);
+
+      return {
+        status: false,
+        error,
+      };
+    }
+  };
+
+  deleteUser = async (id) => {
+    try {
+      const del = await prisma.user.delete({
+        where: {
+          id: id,
+        },
+      });
+
+      return {
+        status: true,
+        msg: "User is deleted.",
+      };
+    } catch (error) {
+      console.error("deleteUser at user module Error: ", error);
+
+      return {
+        status: false,
+        error,
+      };
+    }
+  };
+
+  findUser = async (id) => {
+    try {
+      const find = await prisma.user.findUnique({
+        where: {
+          id: id,
+        },
+      });
+
+      return {
+        status: true,
+        data: find,
+      };
+    } catch (error) {
+      console.error("listUser user module Error: ", error);
+
+      return {
+        status: false,
+        error,
+      };
+    }
+  };
 }
 
-module.exports = new _user()
+module.exports = new _user();

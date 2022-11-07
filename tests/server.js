@@ -1,8 +1,8 @@
-require('dotenv').config()
-const express = require('express');
-const cors = require('cors');
-const routes = require('../routes');
-const cookieParser = require('cookie-parser');
+require("dotenv").config();
+const express = require("express");
+const cors = require("cors");
+const routes = require("../routes");
+const cookieParser = require("cookie-parser");
 
 const app = express();
 const port = 8000;
@@ -12,9 +12,9 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cookieParser());
 
-app.get('/', async (req, res) => {
+app.get("/", async (req, res) => {
   res.send({
-    message: 'You are using Expense Tracker by Kelompok 4'
+    message: "You are using Expense Tracker by Kelompok 4",
   });
 });
 
@@ -24,4 +24,4 @@ app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
 });
 
-module.exports = app
+module.exports = app;
